@@ -1,0 +1,6 @@
+{
+  "name": "학생 정보 수집 및 교사 관리 시스템",
+  "description": "학생 인적사항(학반, 이름, 주민번호, 휴대폰번호) 입력 및 구글 시트 연동, 교사 전용 학반별 조회 웹앱",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
