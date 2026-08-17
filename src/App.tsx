@@ -6,8 +6,8 @@ import { Footer } from "./components/Footer";
 import { GoogleSheetAuthModal } from "./components/GoogleSheetAuthModal";
 
 const SPREADSHEET_URL =
-  "https://docs.google.com/spreadsheets/d/188uRW5c5hB3PVAC50EP_yxwG_cT59TsC/edit?usp=sharing";
-const SPREADSHEET_ID = "188uRW5c5hB3PVAC50EP_yxwG_cT59TsC";
+  "https://docs.google.com/spreadsheets/d/1ArSb9hg1yE1vf_i4t8fEQAOMO7HCaQEAuFHMCydS-6c/edit?gid=112389080#gid=112389080";
+const SPREADSHEET_ID = "1ArSb9hg1yE1vf_i4t8fEQAOMO7HCaQEAuFHMCydS-6c";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<"student" | "teacher">("student");

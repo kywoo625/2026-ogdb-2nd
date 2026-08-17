@@ -18,6 +18,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({ onSubmissionComplete, 
   const [gradeClass, setGradeClass] = useState("2학년 1반");
   const [customClass, setCustomClass] = useState("");
   const [isCustomClassMode, setIsCustomClassMode] = useState(false);
+  const [studentNumber, setStudentNumber] = useState("");
   const [studentName, setStudentName] = useState("");
   const [rrnFront, setRrnFront] = useState(""); // 6 digits
   const [rrnBack, setRrnBack] = useState("");   // 7 digits
@@ -118,6 +119,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({ onSubmissionComplete, 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           gradeClass: finalGradeClass,
+          studentNumber: studentNumber.trim(),
           studentName: studentName.trim(),
           rrn: fullRrn,
           phone: phone.trim(),
@@ -177,6 +179,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({ onSubmissionComplete, 
         setGradeClass(std.gradeClass);
         setIsCustomClassMode(!PRESET_CLASSES.includes(std.gradeClass));
         if (!PRESET_CLASSES.includes(std.gradeClass)) setCustomClass(std.gradeClass);
+        setStudentNumber(std.studentNumber || "");
         setStudentName(std.studentName);
 
         // Split RRN
@@ -211,6 +214,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({ onSubmissionComplete, 
   const handleResetForm = () => {
     setSubmittedRecord(null);
     setExistingId(null);
+    setStudentNumber("");
     setStudentName("");
     setRrnFront("");
     setRrnBack("");
@@ -477,11 +481,29 @@ export const StudentForm: React.FC<StudentFormProps> = ({ onSubmissionComplete, 
           {errors.gradeClass && <p className="text-red-500 text-xs mt-1 font-medium">{errors.gradeClass}</p>}
         </div>
 
-        {/* 2. Name Section */}
+        {/* 2. Student Number Section */}
+        <div>
+          <label className="block text-sm font-bold text-slate-900 mb-2 flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-blue-600" />
+              <span>2. 번호</span>
+            </span>
+            <span className="text-xs text-slate-400 font-normal">숫자만 입력 (예: 1번, 15번)</span>
+          </label>
+          <input
+            type="text"
+            placeholder="출석번호 입력 (예: 1번, 15번 등)"
+            value={studentNumber}
+            onChange={(e) => setStudentNumber(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+          />
+        </div>
+
+        {/* 3. Name Section */}
         <div>
           <label className="block text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
             <User className="w-4 h-4 text-blue-600" />
-            <span>2. 학생 이름</span>
+            <span>3. 학생 이름</span>
           </label>
           <input
             type="text"
@@ -493,12 +515,12 @@ export const StudentForm: React.FC<StudentFormProps> = ({ onSubmissionComplete, 
           {errors.studentName && <p className="text-red-500 text-xs mt-1 font-medium">{errors.studentName}</p>}
         </div>
 
-        {/* 3. Resident Registration Number (RRN) */}
+        {/* 4. Resident Registration Number (RRN) */}
         <div>
           <label className="block text-sm font-bold text-slate-900 mb-2 flex items-center justify-between">
             <span className="flex items-center gap-2">
               <CreditCard className="w-4 h-4 text-blue-600" />
-              <span>3. 주민등록번호</span>
+              <span>4. 주민등록번호</span>
             </span>
             <span className="text-xs text-slate-400 font-normal">하이픈(-) 자동입력</span>
           </label>
@@ -526,12 +548,12 @@ export const StudentForm: React.FC<StudentFormProps> = ({ onSubmissionComplete, 
           {errors.rrn && <p className="text-red-500 text-xs mt-1 font-medium">{errors.rrn}</p>}
         </div>
 
-        {/* 4. Phone Number */}
+        {/* 5. Phone Number */}
         <div>
           <label className="block text-sm font-bold text-slate-900 mb-2 flex items-center justify-between">
             <span className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-blue-600" />
-              <span>4. 본인 휴대폰번호</span>
+              <span>5. 본인 휴대폰번호</span>
             </span>
             <span className="text-xs text-slate-400 font-normal">숫자만 입력</span>
           </label>
@@ -546,12 +568,12 @@ export const StudentForm: React.FC<StudentFormProps> = ({ onSubmissionComplete, 
           {errors.phone && <p className="text-red-500 text-xs mt-1 font-medium">{errors.phone}</p>}
         </div>
 
-        {/* 5. Emergency Parent Phone Number */}
+        {/* 6. Emergency Parent Phone Number */}
         <div>
           <label className="block text-sm font-bold text-slate-900 mb-2 flex items-center justify-between">
             <span className="flex items-center gap-2">
               <HeartHandshake className="w-4 h-4 text-rose-500" />
-              <span>5. 비상시 연락가능한 부모님(보호자) 연락처</span>
+              <span>6. 비상시 연락가능한 부모님(보호자) 연락처</span>
             </span>
             <span className="text-xs text-slate-400 font-normal">선택/추천</span>
           </label>
@@ -565,11 +587,11 @@ export const StudentForm: React.FC<StudentFormProps> = ({ onSubmissionComplete, 
           />
         </div>
 
-        {/* 6. Notes / Suggestions */}
+        {/* 7. Notes / Suggestions */}
         <div>
           <label className="block text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-emerald-600" />
-            <span>6. 기타 건의사항 및 참고사항 (자유롭게 입력)</span>
+            <span>7. 기타 건의사항 및 참고사항 (자유롭게 입력)</span>
           </label>
           <textarea
             rows={3}
@@ -580,12 +602,12 @@ export const StudentForm: React.FC<StudentFormProps> = ({ onSubmissionComplete, 
           />
         </div>
 
-        {/* 7. Student Personal Password Setting */}
+        {/* 8. Student Personal Password Setting */}
         <div className="bg-amber-50/60 border border-amber-200 p-4 rounded-2xl space-y-2">
           <label className="block text-sm font-bold text-slate-900 flex items-center justify-between">
             <span className="flex items-center gap-2">
               <KeyRound className="w-4 h-4 text-amber-700" />
-              <span>7. 정보 보호용 본인 비밀번호 설정 (필수)</span>
+              <span>8. 정보 보호용 본인 비밀번호 설정 (필수)</span>
             </span>
             <span className="text-xs text-amber-800 font-semibold">숫자 또는 문자 4자리 이상</span>
           </label>
@@ -620,6 +642,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({ onSubmissionComplete, 
         onConfirm={handleFinalSubmit}
         inputData={{
           gradeClass: finalGradeClass,
+          studentNumber: studentNumber.trim(),
           studentName: studentName.trim(),
           rrn: fullRrn,
           phone: phone.trim(),

@@ -1,6 +1,7 @@
 export interface StudentRecord {
   id: string;
   gradeClass: string; // e.g. "2학년 1반"
+  studentNumber: string; // e.g. "1번", "15"
   studentName: string; // e.g. "홍길동"
   rrn: string; // 주민등록번호 e.g. "050123-3456789"
   phone: string; // 본인 휴대폰번호 e.g. "010-1234-5678"
@@ -14,6 +15,7 @@ export interface StudentRecord {
 
 export interface StudentInput {
   gradeClass: string;
+  studentNumber: string;
   studentName: string;
   rrn: string;
   phone: string;

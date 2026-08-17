@@ -63,12 +63,19 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </div>
 
           <div className="bg-slate-50 rounded-xl p-4 border border-slate-200/80 space-y-3.5">
-            {/* Grade/Class */}
+            {/* Grade/Class & Number */}
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-200/60">
-              <span className="text-xs font-semibold text-slate-500">학반</span>
-              <span className="text-sm font-bold text-slate-900 bg-blue-100/70 text-blue-800 px-2.5 py-0.5 rounded-md">
-                {inputData.gradeClass}
-              </span>
+              <span className="text-xs font-semibold text-slate-500">학반 및 번호</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-bold text-slate-900 bg-blue-100/70 text-blue-800 px-2.5 py-0.5 rounded-md">
+                  {inputData.gradeClass}
+                </span>
+                {inputData.studentNumber && (
+                  <span className="text-sm font-bold text-slate-800 bg-slate-200 px-2 py-0.5 rounded-md">
+                    {inputData.studentNumber}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Name */}

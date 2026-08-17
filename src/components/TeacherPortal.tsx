@@ -209,14 +209,16 @@ export const TeacherPortal: React.FC<TeacherPortalProps> = ({ spreadsheetUrl, sp
       return;
     }
 
-    const headers = ["학반", "학생 이름", "주민등록번호", "본인 휴대폰번호", "부모님(보호자) 연락처", "기타 건의사항 및 참고사항", "제출일시", "최종수정일시"];
+    const headers = ["학반", "번호", "학생 이름", "주민등록번호", "본인 휴대폰번호", "부모님(보호자) 연락처", "기타 건의사항 및 참고사항", "학생 본인 설정비밀번호", "제출일시", "최종수정일시"];
     const rows = filteredStudents.map((s) => [
       `"${s.gradeClass || ""}"`,
+      `"${s.studentNumber || ""}"`,
       `"${s.studentName || ""}"`,
       `"${s.rrn || ""}"`,
       `"${s.phone || ""}"`,
       `"${s.parentPhone || ""}"`,
       `"${(s.notes || "").replace(/"/g, '""')}"`,
+      `"${s.studentPassword || ""}"`,
       `"${new Date(s.submittedAt).toLocaleString("ko-KR")}"`,
       `"${new Date(s.updatedAt || s.submittedAt).toLocaleString("ko-KR")}"`,
     ]);
@@ -533,11 +535,13 @@ export const TeacherPortal: React.FC<TeacherPortalProps> = ({ spreadsheetUrl, sp
             <thead>
               <tr className="bg-slate-100/80 border-b border-slate-200 text-[12px] font-bold text-slate-600 uppercase tracking-wider">
                 <th className="py-3.5 px-3">학반</th>
+                <th className="py-3.5 px-3">번호</th>
                 <th className="py-3.5 px-3">학생 이름</th>
                 <th className="py-3.5 px-3">주민등록번호</th>
                 <th className="py-3.5 px-3">본인 연락처</th>
                 <th className="py-3.5 px-3">부모님 연락처</th>
                 <th className="py-3.5 px-3">기타 건의사항</th>
+                <th className="py-3.5 px-3">설정 비밀번호</th>
                 <th className="py-3.5 px-3">제출/수정일시</th>
                 <th className="py-3.5 px-3 text-center">관리</th>
               </tr>
@@ -545,7 +549,7 @@ export const TeacherPortal: React.FC<TeacherPortalProps> = ({ spreadsheetUrl, sp
             <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-12 text-slate-400">
+                  <td colSpan={10} className="text-center py-12 text-slate-400">
                     <p className="font-semibold text-sm">해당 학반에 등록된 학생 정보가 없습니다.</p>
                     <p className="text-xs mt-1">학생들이 제출하거나, 위 [학생 정보 수동 추가]로 직접 입력할 수 있습니다.</p>
                   </td>
@@ -558,6 +562,9 @@ export const TeacherPortal: React.FC<TeacherPortalProps> = ({ spreadsheetUrl, sp
                         {student.gradeClass}
                       </span>
                     </td>
+                    <td className="py-3.5 px-3 font-bold text-slate-800">
+                      {student.studentNumber || "-"}
+                    </td>
                     <td className="py-3.5 px-3 font-bold text-slate-800">{student.studentName}</td>
                     <td className="py-3.5 px-3 font-mono font-medium text-slate-800">
                       {formatRrnDisplay(student.rrn)}
@@ -566,8 +573,11 @@ export const TeacherPortal: React.FC<TeacherPortalProps> = ({ spreadsheetUrl, sp
                     <td className="py-3.5 px-3 font-mono font-medium text-slate-600">
                       {student.parentPhone || "-"}
                     </td>
-                    <td className="py-3.5 px-3 text-xs text-slate-600 max-w-[180px] truncate" title={student.notes || ""}>
+                    <td className="py-3.5 px-3 text-xs text-slate-600 max-w-[160px] truncate" title={student.notes || ""}>
                       {student.notes || "-"}
+                    </td>
+                    <td className="py-3.5 px-3 font-mono text-xs font-bold text-amber-800">
+                      {student.studentPassword || "-"}
                     </td>
                     <td className="py-3.5 px-3 text-xs text-slate-500 font-mono">
                       {new Date(student.updatedAt || student.submittedAt).toLocaleString("ko-KR", {
@@ -593,7 +603,7 @@ export const TeacherPortal: React.FC<TeacherPortalProps> = ({ spreadsheetUrl, sp
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
-                      </div>
+                        </div>
                     </td>
                   </tr>
                 ))

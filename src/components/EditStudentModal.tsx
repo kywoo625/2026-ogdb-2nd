@@ -16,6 +16,7 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
   onSave,
 }) => {
   const [gradeClass, setGradeClass] = useState("");
+  const [studentNumber, setStudentNumber] = useState("");
   const [studentName, setStudentName] = useState("");
   const [rrn, setRrn] = useState("");
   const [phone, setPhone] = useState("");
@@ -26,6 +27,7 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
   useEffect(() => {
     if (student) {
       setGradeClass(student.gradeClass || "");
+      setStudentNumber(student.studentNumber || "");
       setStudentName(student.studentName || "");
       setRrn(student.rrn || "");
       setPhone(student.phone || "");
@@ -48,6 +50,7 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
       await onSave({
         ...student,
         gradeClass: gradeClass.trim(),
+        studentNumber: studentNumber.trim(),
         studentName: studentName.trim(),
         rrn: rrn.trim(),
         phone: phone.trim(),
@@ -74,14 +77,27 @@ export const EditStudentModal: React.FC<EditStudentModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-3.5 text-xs sm:text-sm max-h-[85vh] overflow-y-auto">
-          <div>
-            <label className="block font-bold text-slate-700 mb-1">학반</label>
-            <input
-              type="text"
-              value={gradeClass}
-              onChange={(e) => setGradeClass(e.target.value)}
-              className="w-full px-3.5 py-2 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">학반</label>
+              <input
+                type="text"
+                value={gradeClass}
+                onChange={(e) => setGradeClass(e.target.value)}
+                className="w-full px-3.5 py-2 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">번호</label>
+              <input
+                type="text"
+                placeholder="예: 1번 또는 15"
+                value={studentNumber}
+                onChange={(e) => setStudentNumber(e.target.value)}
+                className="w-full px-3.5 py-2 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
           </div>
 
           <div>

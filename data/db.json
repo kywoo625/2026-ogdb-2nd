@@ -1,0 +1,50 @@
+{
+  "teacherPassword": "0903",
+  "webhookUrl": "",
+  "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/1ArSb9hg1yE1vf_i4t8fEQAOMO7HCaQEAuFHMCydS-6c/edit?gid=112389080#gid=112389080",
+  "spreadsheetId": "1ArSb9hg1yE1vf_i4t8fEQAOMO7HCaQEAuFHMCydS-6c",
+  "students": [
+    {
+      "id": "std-sample-1",
+      "gradeClass": "2학년 1반",
+      "studentNumber": "1번",
+      "studentName": "김민준",
+      "rrn": "080315-3123456",
+      "phone": "010-1234-5678",
+      "parentPhone": "010-8765-4321",
+      "notes": "체육 활동 시 호흡기 질환 유의 요청",
+      "studentPassword": "1234",
+      "submittedAt": "2026-08-16T08:19:22.741Z",
+      "updatedAt": "2026-08-16T08:19:22.741Z",
+      "syncedToSheet": false
+    },
+    {
+      "id": "std-sample-2",
+      "gradeClass": "2학년 1반",
+      "studentNumber": "2번",
+      "studentName": "이서연",
+      "rrn": "080722-4234567",
+      "phone": "010-9876-5432",
+      "parentPhone": "010-7654-3210",
+      "notes": "",
+      "studentPassword": "1234",
+      "submittedAt": "2026-08-16T20:19:22.741Z",
+      "updatedAt": "2026-08-16T20:19:22.741Z",
+      "syncedToSheet": false
+    },
+    {
+      "id": "std-sample-3",
+      "gradeClass": "2학년 2반",
+      "studentNumber": "5번",
+      "studentName": "박도윤",
+      "rrn": "081105-3345678",
+      "phone": "010-5555-7777",
+      "parentPhone": "010-3333-2222",
+      "notes": "동아리 활동 연극부 희망",
+      "studentPassword": "1234",
+      "submittedAt": "2026-08-17T03:19:22.741Z",
+      "updatedAt": "2026-08-17T03:19:22.741Z",
+      "syncedToSheet": false
+    }
+  ]
+}

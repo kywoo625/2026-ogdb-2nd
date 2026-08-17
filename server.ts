@@ -6,6 +6,7 @@ import { createServer as createViteServer } from "vite";
 interface StudentRecord {
   id: string;
   gradeClass: string;
+  studentNumber: string;
   studentName: string;
   rrn: string;
   phone: string;
@@ -29,8 +30,8 @@ interface DBData {
 const DATA_DIR = path.join(process.cwd(), "data");
 const DB_FILE = path.join(DATA_DIR, "db.json");
 
-const DEFAULT_SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/188uRW5c5hB3PVAC50EP_yxwG_cT59TsC/edit?usp=sharing";
-const DEFAULT_SPREADSHEET_ID = "188uRW5c5hB3PVAC50EP_yxwG_cT59TsC";
+const DEFAULT_SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1ArSb9hg1yE1vf_i4t8fEQAOMO7HCaQEAuFHMCydS-6c/edit?gid=112389080#gid=112389080";
+const DEFAULT_SPREADSHEET_ID = "1ArSb9hg1yE1vf_i4t8fEQAOMO7HCaQEAuFHMCydS-6c";
 
 // Ensure data directory exists
 if (!fs.existsSync(DATA_DIR)) {
@@ -49,6 +50,7 @@ function loadDB(): DBData {
         {
           id: "std-sample-1",
           gradeClass: "2학년 1반",
+          studentNumber: "1번",
           studentName: "김민준",
           rrn: "080315-3123456",
           phone: "010-1234-5678",
@@ -62,6 +64,7 @@ function loadDB(): DBData {
         {
           id: "std-sample-2",
           gradeClass: "2학년 1반",
+          studentNumber: "2번",
           studentName: "이서연",
           rrn: "080722-4234567",
           phone: "010-9876-5432",
@@ -75,6 +78,7 @@ function loadDB(): DBData {
         {
           id: "std-sample-3",
           gradeClass: "2학년 2반",
+          studentNumber: "5번",
           studentName: "박도윤",
           rrn: "081105-3345678",
           phone: "010-5555-7777",
@@ -125,32 +129,63 @@ async function triggerWebhookSync(db: DBData, records: StudentRecord[]) {
     return { success: false, message: "구글 시트 Webhook URL이 설정되지 않았습니다." };
   }
 
+  const cleanUrl = db.webhookUrl.trim();
+  if (cleanUrl.includes("/edit") || cleanUrl.endsWith("/dev")) {
+    return {
+      success: false,
+      message: "입력된 URL이 편집용 또는 개발용 주소입니다. Apps Script의 [배포] -> [새 배포]에서 생성된 '/exec'로 끝나는 웹 앱 URL을 입력해주세요."
+    };
+  }
+
   try {
-    const response = await fetch(db.webhookUrl.trim(), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "SYNC_STUDENTS",
-        spreadsheetId: db.spreadsheetId,
-        records: records,
-        timestamp: new Date().toISOString()
-      }),
+    const payload = JSON.stringify({
+      action: "SYNC_STUDENTS",
+      spreadsheetId: db.spreadsheetId,
+      records: records,
+      timestamp: new Date().toISOString()
     });
 
-    if (response.ok) {
+    const response = await fetch(cleanUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+      redirect: "follow",
+    });
+
+    const text = await response.text().catch(() => "");
+    
+    // Check if Google returned an authorization/login page
+    if (text.includes("accounts.google.com") || (text.includes("<html") && (text.includes("Google Drive") || text.includes("로그인") || text.includes("Service Login")))) {
+      return {
+        success: false,
+        message: "구글 로그인/권한 오류: Apps Script [새 배포] 시 '액세스 권한 있는 사용자'를 '모든 사용자(Anyone)'로 설정해야 학생 제출이 정상 수신됩니다."
+      };
+    }
+
+    let jsonRes: any = null;
+    try {
+      jsonRes = JSON.parse(text);
+    } catch {
+      // Non-JSON response
+    }
+
+    if (response.ok || (jsonRes && jsonRes.result === "success")) {
       // Mark as synced
       const recordIds = new Set(records.map(r => r.id));
       db.students = db.students.map(s => recordIds.has(s.id) ? { ...s, syncedToSheet: true } : s);
       db.lastSyncedAt = new Date().toISOString();
       saveDB(db);
-      return { success: true, message: "구글 시트로 성공적으로 동기화되었습니다." };
+      return {
+        success: true,
+        message: `구글 시트로 성공적으로 동기화되었습니다! (${records.length}건)`
+      };
     } else {
-      const text = await response.text().catch(() => "");
-      return { success: false, message: `웹훅 응답 오류 (${response.status}): ${text}` };
+      const errMsg = jsonRes?.error || text || response.statusText;
+      return { success: false, message: `구글 시트 응답 오류 (${response.status}): ${errMsg}` };
     }
   } catch (err: any) {
     console.error("Webhook sync error:", err);
-    return { success: false, message: `동기화 실패: ${err?.message || "네트워크 오류"}` };
+    return { success: false, message: `동기화 실패: ${err?.message || "네트워크 연결 오류"}` };
   }
 }
 
@@ -248,7 +283,7 @@ async function startServer() {
 
   // Submit student info (New or Update)
   app.post("/api/students/submit", async (req: Request, res: Response) => {
-    const { gradeClass, studentName, rrn, phone, parentPhone, notes, studentPassword, existingId } = req.body;
+    const { gradeClass, studentNumber, studentName, rrn, phone, parentPhone, notes, studentPassword, existingId } = req.body;
 
     if (!gradeClass || !studentName || !rrn || !phone || !studentPassword) {
       return res.status(400).json({ success: false, message: "필수 항목(학반, 이름, 주민번호, 휴대폰번호, 본인 설정 비밀번호)을 모두 입력해주세요." });
@@ -287,6 +322,7 @@ async function startServer() {
       record = {
         ...db.students[targetIndex],
         gradeClass: gradeClass.trim(),
+        studentNumber: studentNumber ? studentNumber.trim() : (db.students[targetIndex].studentNumber || ""),
         studentName: studentName.trim(),
         rrn: rrn.trim(),
         phone: phone.trim(),
@@ -302,6 +338,7 @@ async function startServer() {
       record = {
         id: `std-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         gradeClass: gradeClass.trim(),
+        studentNumber: studentNumber ? studentNumber.trim() : "",
         studentName: studentName.trim(),
         rrn: rrn.trim(),
         phone: phone.trim(),
@@ -333,7 +370,7 @@ async function startServer() {
   // Update specific student (Teacher edit)
   app.put("/api/students/:id", (req: Request, res: Response) => {
     const { id } = req.params;
-    const { gradeClass, studentName, rrn, phone, parentPhone, notes, studentPassword } = req.body;
+    const { gradeClass, studentNumber, studentName, rrn, phone, parentPhone, notes, studentPassword } = req.body;
 
     const db = loadDB();
     const index = db.students.findIndex(s => s.id === id);
@@ -345,6 +382,7 @@ async function startServer() {
     const updated: StudentRecord = {
       ...db.students[index],
       gradeClass: gradeClass || db.students[index].gradeClass,
+      studentNumber: studentNumber !== undefined ? studentNumber : db.students[index].studentNumber,
       studentName: studentName || db.students[index].studentName,
       rrn: rrn || db.students[index].rrn,
       phone: phone || db.students[index].phone,
@@ -399,6 +437,49 @@ async function startServer() {
 
     saveDB(db);
     res.json({ success: true, message: "구글 시트 연동 설정이 저장되었습니다." });
+  });
+
+  // Test webhook connection
+  app.post("/api/sync/test", async (req: Request, res: Response) => {
+    const { webhookUrl } = req.body;
+    const db = loadDB();
+    const targetUrl = (webhookUrl || db.webhookUrl || "").trim();
+
+    if (!targetUrl) {
+      return res.status(400).json({ success: false, message: "테스트할 Webhook URL을 입력해주세요." });
+    }
+
+    if (targetUrl.includes("/edit") || targetUrl.endsWith("/dev")) {
+      return res.json({
+        success: false,
+        message: "URL 확인 필요: '/edit' 또는 '/dev' 주소가 아닌, [배포] -> [새 배포]에서 생성된 '/exec'로 끝나는 웹 앱 URL이어야 합니다."
+      });
+    }
+
+    try {
+      const response = await fetch(targetUrl, {
+        method: "GET",
+        redirect: "follow",
+      });
+
+      const text = await response.text().catch(() => "");
+      if (text.includes("accounts.google.com") || (text.includes("<html") && (text.includes("로그인") || text.includes("Service Login")))) {
+        return res.json({
+          success: false,
+          message: "권한 오류: 구글 로그인 페이지가 반환되었습니다. Apps Script [새 배포] 설정에서 '액세스 권한 있는 사용자'를 반드시 '모든 사용자(Anyone)'로 설정해주세요!"
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "연결 성공! 구글 시트 Apps Script와 정상적으로 통신할 수 있습니다."
+      });
+    } catch (err: any) {
+      res.json({
+        success: false,
+        message: `연결 실패: ${err?.message || "네트워크 오류"}`
+      });
+    }
   });
 
   // Trigger manual bulk sync to Google Sheet
